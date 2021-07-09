@@ -32,7 +32,7 @@ class ApplicationContextProvider {
                     it["deviceId"]?.toInt() ?: throw FieldNotFoundException("deviceId"),
                     it["description"] ?: throw FieldNotFoundException("description")
                 )
-            }
+            }.associateBy { it.id }
             val testers = csvReader.readAll(TESTERS_FILE_NAME) {
                 val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 Tester(
@@ -49,7 +49,13 @@ class ApplicationContextProvider {
                     it["deviceId"]?.toInt() ?: throw FieldNotFoundException("deviceId")
                 )
             }
-            applicationContext = ApplicationContext(bugs, devices, testers, testerDevices)
+            val devicesIdsByTesterId = testerDevices
+                .groupBy(TesterDevice::testerId)
+                .mapValues { it.value.map(TesterDevice::deviceId) }
+            applicationContext = ApplicationContext(
+                bugs,
+                testers.map { TesterWithDevices.merge(it, devices, devicesIdsByTesterId) }
+            )
         }
     }
 }

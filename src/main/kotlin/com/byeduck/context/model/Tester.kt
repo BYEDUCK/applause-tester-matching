@@ -1,4 +1,4 @@
-package com.byeduck.context
+package com.byeduck.context.model
 
 import java.time.LocalDateTime
 

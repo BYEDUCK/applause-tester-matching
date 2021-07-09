@@ -1,4 +1,4 @@
-package com.byeduck.context
+package com.byeduck.context.model
 
 data class TesterDevice(
     val testerId: Int,

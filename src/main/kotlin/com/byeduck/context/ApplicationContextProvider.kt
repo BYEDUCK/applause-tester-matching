@@ -20,6 +20,9 @@ class ApplicationContextProvider {
             applicationContext ?: throw IllegalStateException("Application context hasn't been initialized!")
 
         fun init() {
+            if (applicationContext != null) {
+                return
+            }
             val csvReader: CsvReader = DefaultCsvReader()
             val bugs = csvReader.readAll(BUGS_FILE_NAME) {
                 Bug(

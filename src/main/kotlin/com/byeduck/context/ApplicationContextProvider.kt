@@ -1,10 +1,7 @@
 package com.byeduck.context
 
-import com.byeduck.BUGS_FILE_NAME
-import com.byeduck.DEVICES_FILE_NAME
-import com.byeduck.TESTERS_FILE_NAME
-import com.byeduck.TESTER_DEVICE_FILE_NAME
 import com.byeduck.context.model.*
+import com.byeduck.csv.ContextFileNamesProvider
 import com.byeduck.csv.CsvReader
 import com.byeduck.csv.DefaultCsvReader
 import java.time.LocalDateTime
@@ -19,18 +16,19 @@ class ApplicationContextProvider {
         fun getContext(): ApplicationContext =
             applicationContext ?: throw IllegalStateException("Application context hasn't been initialized!")
 
-        fun init() {
+        fun init(contextFileNamesProvider: ContextFileNamesProvider) {
             if (applicationContext != null) {
                 return
             }
             val csvReader: CsvReader = DefaultCsvReader()
-            val bugs = csvReader.readAll(BUGS_FILE_NAME, this::bugCsvMapper)
-            val devices = csvReader.readAll(DEVICES_FILE_NAME, this::deviceCsvMapper)
+            val bugs = csvReader.readAll(contextFileNamesProvider.getBugsFileName(), this::bugCsvMapper)
+            val devices = csvReader.readAll(contextFileNamesProvider.getDevicesFileName(), this::deviceCsvMapper)
                 .associateBy { it.id }
-            val testers = csvReader.readAll(TESTERS_FILE_NAME, this::testersMapper)
-            val devicesIdsByTesterId = csvReader.readAll(TESTER_DEVICE_FILE_NAME, this::testerDeviceMapper)
-                .groupBy(TesterDevice::testerId)
-                .mapValues { it.value.map(TesterDevice::deviceId) }
+            val testers = csvReader.readAll(contextFileNamesProvider.getTestersFileName(), this::testersMapper)
+            val devicesIdsByTesterId =
+                csvReader.readAll(contextFileNamesProvider.getTesterDeviceFileName(), this::testerDeviceMapper)
+                    .groupBy(TesterDevice::testerId)
+                    .mapValues { it.value.map(TesterDevice::deviceId) }
             applicationContext = ApplicationContext(
                 bugs,
                 testers.map { TesterWithDevices.merge(it, devices, devicesIdsByTesterId) }

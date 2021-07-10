@@ -12,10 +12,27 @@
 - JDK 11
 - Maven 3.6.3
 
-## Running manual
+OR
 
-1. `mvn clean package`
-2. `mvn exec:java`
+- Docker
+
+## Running options
+
+1. Using maven:
+   - using maven plugin
+      - `mvn clean compile`
+      - `mvn exec:java`
+   - running jar directly
+      - `mvn clean package`
+      - `java -jar ./target/applause-tester-matching-1.0-SNAPSHOT-jar-with-dependencies.jar`
+
+2. Using docker (require only docker to be installed):
+   - manually:
+      - `mvn clean package`
+      - `docker build -t applause .`
+      - `docker run -it --rm applause`
+   - automatically:
+      - `./run.sh`
 
 ## Example usage
 

@@ -1,5 +1,6 @@
 package com.byeduck
 
+import com.byeduck.SearchCriteriaParser.Companion.WILD_CARD
 import com.byeduck.context.ApplicationContextInitializer
 import com.byeduck.csv.DefaultContextFileNamesProvider
 import com.byeduck.csv.DefaultCsvReader
@@ -28,14 +29,14 @@ fun main(args: Array<String>) {
         println("\n")
         while (true) {
             println("Please enter search criteria separated with comas:")
-            print("Countries (default: ALL): ")
+            print("Countries (default: $WILD_CARD): ")
             var input = consoleReader.readLine()
             if (EXIT_INPUT == input) {
                 break
             }
             val searchCountries = input.sanitizeInputCriteria().split(",")
             println()
-            print("Devices (default: ALL)(you can also input device's ids from the list): ")
+            print("Devices (default: $WILD_CARD)(you can also input device's ids from the list): ")
             input = consoleReader.readLine()
             if (EXIT_INPUT == input) {
                 break
@@ -57,5 +58,5 @@ fun String?.sanitizeInputCriteria() = this
     ?.removeSurrounding("\"")
     ?.removeSurrounding("'")
     ?.trim().let {
-        it?.ifEmpty { "ALL" }
-    } ?: "ALL"
+        it?.ifEmpty { WILD_CARD }
+    } ?: WILD_CARD

@@ -7,21 +7,25 @@ class SearchCriteriaParser {
 
     companion object {
 
-        private const val WILD_CARD = "ALL"
+        const val WILD_CARD = "ALL"
 
         fun parse(
-            countries: List<String>,
-            devices: List<String>
+            searchCountries: List<String>,
+            searchDevices: List<String>
         ): (testers: List<TesterWithDevices>) -> List<TesterWithDevices> {
             return { testers ->
                 val countryMatchingTesters =
-                    if (countries.containWildCard()) testers else testers.filter { it.isCountryMatching(countries) }
-                val isDevicesWildCard = devices.containWildCard()
+                    if (searchCountries.containWildCard()) testers else testers.filter {
+                        it.isCountryMatching(
+                            searchCountries
+                        )
+                    }
+                val isDevicesWildCard = searchDevices.containWildCard()
                 countryMatchingTesters.map {
                     TesterWithDevices(
                         it.tester,
                         if (isDevicesWildCard) it.devices else it.devices.filter { device ->
-                            device.isDeviceMatching(devices)
+                            device.isDeviceMatching(searchDevices)
                         }
                     )
                 }.filter { it.devices.isNotEmpty() }
@@ -30,11 +34,11 @@ class SearchCriteriaParser {
 
         private fun List<String>.containWildCard(): Boolean = this.contains(WILD_CARD)
 
-        private fun Device.isDeviceMatching(devices: List<String>): Boolean =
-            devices.isEmpty() || devices.any { it == this.description }
+        private fun Device.isDeviceMatching(searchDevices: List<String>): Boolean =
+            searchDevices.isEmpty() || searchDevices.any { it == this.description }
 
-        private fun TesterWithDevices.isCountryMatching(countries: List<String>): Boolean =
-            countries.isEmpty() || countries.find { it == this.tester.country } != null
+        private fun TesterWithDevices.isCountryMatching(searchCountries: List<String>): Boolean =
+            searchCountries.isEmpty() || searchCountries.find { it == this.tester.country } != null
 
     }
 }

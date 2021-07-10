@@ -29,6 +29,6 @@ internal class TestingMatcherTest {
             .allMatch { rankedTester -> rankedTester.testerWithDevices.tester.country == "PL" }
             .allMatch { rankedTester -> rankedTester.testerWithDevices.devices.any { it.description == "iPhone 4S" || it.description == "iPhone 5" } }
             .element(0)
-            .matches { rankedTester -> rankedTester.testerWithDevices.tester.id == 2 }
+            .matches { rankedTester -> rankedTester.testerWithDevices.tester.id == 2 && rankedTester.rank == 5 }
     }
 }

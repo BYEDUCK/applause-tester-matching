@@ -16,15 +16,20 @@ OR
 
 - Docker
 
+## Fetch source code
+
+- `git clone https://github.com/BYEDUCK/applause-tester-matching.git`
+- or use download button on GitHub
+
 ## Running options
 
 1. Using maven:
-   - using maven plugin
-      - `mvn clean compile`
-      - `mvn exec:java`
-   - running jar directly
-      - `mvn clean package`
-      - `java -jar ./target/applause-tester-matching-1.0-SNAPSHOT-jar-with-dependencies.jar`
+    - using maven plugin
+        - `mvn clean compile`
+        - `mvn exec:java`
+    - running jar directly
+        - `mvn clean package`
+        - `java -jar ./target/applause-tester-matching-1.0-SNAPSHOT-jar-with-dependencies.jar`
 
 2. Using docker (require only docker to be installed):
    - manually:

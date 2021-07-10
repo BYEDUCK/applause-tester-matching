@@ -10,11 +10,9 @@ class SearchCriteriaParser {
         private const val WILD_CARD = "ALL"
 
         fun parse(
-            countrySearchCriteria: String,
-            deviceSearchCriteria: String
+            countries: List<String>,
+            devices: List<String>
         ): (testers: List<TesterWithDevices>) -> List<TesterWithDevices> {
-            val countries = countrySearchCriteria.split(',')
-            val devices = deviceSearchCriteria.split(',')
             return { testers ->
                 val countryMatchingTesters =
                     if (countries.containWildCard()) testers else testers.filter { it.isCountryMatching(countries) }

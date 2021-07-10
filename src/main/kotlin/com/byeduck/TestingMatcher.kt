@@ -1,20 +1,17 @@
 package com.byeduck
 
-import com.byeduck.context.ApplicationContextProvider
+import com.byeduck.context.ApplicationContext
 import com.byeduck.context.model.Bug
 import com.byeduck.context.model.TesterWithDevices
-import com.byeduck.csv.ContextFileNamesProvider
 
 class TestingMatcher(
-    private val contextFileNamesProvider: ContextFileNamesProvider
+    private val applicationContext: ApplicationContext
 ) {
 
-    fun match(countrySearchCriteria: String, deviceSearchCriteria: String): List<RankedTester> {
-        ApplicationContextProvider.init(contextFileNamesProvider)
-        val context = ApplicationContextProvider.getContext()
-        val searchPredicateMapping = SearchCriteriaParser.parse(countrySearchCriteria, deviceSearchCriteria)
-        val testers = context.testers.let(searchPredicateMapping)
-        return testers.map { RankedTester(it, count(it, context.bugs)) }
+    fun match(countries: List<String>, devices: List<String>): List<RankedTester> {
+        val searchPredicateMapping = SearchCriteriaParser.parse(countries, devices)
+        val testers = applicationContext.testers.let(searchPredicateMapping)
+        return testers.map { RankedTester(it, count(it, applicationContext.bugs)) }
             .sortedByDescending { it.rank }
     }
 

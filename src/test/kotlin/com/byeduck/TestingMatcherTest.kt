@@ -1,6 +1,9 @@
 package com.byeduck
 
+import com.byeduck.context.ApplicationContextInitializer
 import com.byeduck.csv.ContextFileNamesProvider
+import com.byeduck.csv.DefaultCsvReader
+import com.byeduck.csv.FromCsvDataProvider
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -17,8 +20,10 @@ internal class TestingMatcherTest {
 
             override fun getTestersFileName(): String = "test_testers.csv"
         }
-        val testingMatcher = TestingMatcher(fileNamesProvider)
-        val result = testingMatcher.match("PL", "iPhone 4S,iPhone 5")
+        val csvDataProvider = FromCsvDataProvider(fileNamesProvider, DefaultCsvReader())
+        val context = ApplicationContextInitializer.init(csvDataProvider)
+        val testingMatcher = TestingMatcher(context)
+        val result = testingMatcher.match(listOf("PL"), listOf("iPhone 4S", "iPhone 5"))
         assertThat(result)
             .hasSize(2)
             .allMatch { rankedTester -> rankedTester.testerWithDevices.tester.country == "PL" }

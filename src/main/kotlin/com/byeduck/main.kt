@@ -1,23 +1,61 @@
 package com.byeduck
 
+import com.byeduck.context.ApplicationContextInitializer
 import com.byeduck.csv.DefaultContextFileNamesProvider
+import com.byeduck.csv.DefaultCsvReader
+import com.byeduck.csv.FromCsvDataProvider
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
-// mvn package exec:java -Dexec.args="JP,GP iPhone_4,iPhone_4S"
+const val EXIT_INPUT = "exit"
+
 fun main(args: Array<String>) {
-    val defaultCountrySearchCriteria = "ALL"
-    val defaultDeviceSearchCriteria = "ALL"
-    val criteria = args[0].split(" ")
-    val countrySearchCriteria = criteria.getOrElse(0) { defaultCountrySearchCriteria }.sanitizeInputCriteria()
-    val deviceSearchCriteria: String = criteria.getOrElse(1) { defaultDeviceSearchCriteria }.sanitizeInputCriteria()
-    println("Executing matching for the following criteria: $countrySearchCriteria | $deviceSearchCriteria")
-    val testingMatcher = TestingMatcher(DefaultContextFileNamesProvider())
-    val testersWithRanks = testingMatcher.match(countrySearchCriteria, deviceSearchCriteria)
-    val result = testersWithRanks.joinToString("\n") { it.toString() }
-    println("Results:\n$result")
+    println("Welcome to Testing Matcher.")
+    println("Initializing...")
+    val csvDataProvider = FromCsvDataProvider(DefaultContextFileNamesProvider(), DefaultCsvReader())
+    val context = ApplicationContextInitializer.init(csvDataProvider)
+    val testingMatcher = TestingMatcher(context)
+    println("Done.")
+    println("Type \"exit\" (without quotes) in order to exit the app")
+    println()
+    BufferedReader(InputStreamReader(System.`in`)).use { consoleReader ->
+        val availableCountries = context.testers.map { it.tester.country }.distinct()
+        val availableDevices = context.testers.flatMap { it.devices }.associate { it.id to it.description }
+        println("Available countries:\n$availableCountries")
+        println("Available devices:\n${
+            availableDevices.toList().sortedBy { it.first }.joinToString("\n") { "${it.first} -> ${it.second}" }
+        }")
+        println("\n")
+        while (true) {
+            println("Please enter search criteria separated with comas:")
+            print("Countries (default: ALL): ")
+            var input = consoleReader.readLine()
+            if (EXIT_INPUT == input) {
+                break
+            }
+            val searchCountries = input.sanitizeInputCriteria().split(",")
+            println()
+            print("Devices (default: ALL)(you can also input device's ids from the list): ")
+            input = consoleReader.readLine()
+            if (EXIT_INPUT == input) {
+                break
+            }
+            val searchDevices = input.sanitizeInputCriteria().split(",").map {
+                if (it.all(Character::isDigit)) availableDevices.getOrDefault(it.toInt(), "") else it
+            }
+            println("Executing matching for the following criteria: $searchCountries | $searchDevices")
+            val testersRanking = testingMatcher.match(searchCountries, searchDevices)
+            val result = testersRanking.joinToString("\n") { it.toString() }
+            println("Results:\n$result")
+            println()
+        }
+    }
 }
 
-fun String.sanitizeInputCriteria() = this
-    .replace('_', ' ')
-    .removeSurrounding("\"")
-    .removeSurrounding("'")
-    .trim()
+fun String?.sanitizeInputCriteria() = this
+    ?.replace('_', ' ')
+    ?.removeSurrounding("\"")
+    ?.removeSurrounding("'")
+    ?.trim().let {
+        it?.ifEmpty { "ALL" }
+    } ?: "ALL"
